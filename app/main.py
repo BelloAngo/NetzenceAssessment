@@ -4,11 +4,19 @@ from contextlib import asynccontextmanager
 
 from anyio import to_thread
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import ORJSONResponse
 
+from app.common.exceptions import CustomHTTPException, InternalServerError
 from app.core.database import initialize_tables
+from app.core.handlers import (
+    base_exception_handler,
+    custom_http_exception_handler,
+    internal_server_error_exception_handler,
+    request_validation_exception_handler,
+)
 from app.item.apis import router as item_router
 from app.item.models import MODULE_TABLES as item_models
 
@@ -61,6 +69,13 @@ app.add_middleware(
     GZipMiddleware,
     minimum_size=5000,  # Minimum size of the response before it is compressed in bytes
 )
+
+
+# Exception Handlers
+app.add_exception_handler(RequestValidationError, request_validation_exception_handler)  # type: ignore
+app.add_exception_handler(InternalServerError, internal_server_error_exception_handler)  # type: ignore
+app.add_exception_handler(CustomHTTPException, custom_http_exception_handler)  # type: ignore
+app.add_exception_handler(Exception, base_exception_handler)
 
 
 # Health Check
