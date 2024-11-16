@@ -8,11 +8,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import ORJSONResponse
 
-# from app.core.database import initialize_tables
-# from app.item.models import MODULE_TABLES as item_models
+from app.core.database import initialize_tables
+from app.item.models import MODULE_TABLES as item_models
 
 # Globals
-# TABLES = {**item_models}
+TABLES = {**item_models}
 
 
 # Lifespan (startup, shutdown)
@@ -27,7 +27,8 @@ async def lifespan(_: FastAPI):
     limiter.total_tokens = 1000
 
     # Init tables
-    # initialize_tables(tables_dict=TABLES)
+    print("Initializing tables...")
+    initialize_tables(tables=TABLES)
 
     # Shutdown
     yield
