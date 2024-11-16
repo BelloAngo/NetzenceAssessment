@@ -38,8 +38,11 @@ async def create_item(data: create.ItemCreate):
 async def edit_item(item: base.Item, data: edit.ItemEdit):
     # Save changes
     item_table.update_item(
-        Key={"itemId": item.itemId},
-        UpdateExpression="SET name = :name, description = :description",
+        Key={"itemId": str(item.itemId)},
+        UpdateExpression="SET #name = :name, description = :description",
+        ExpressionAttributeNames={
+            "#name": "name",  # Use a placeholder for the reserved keyword
+        },
         ExpressionAttributeValues={
             ":name": data.name,
             ":description": data.description,
@@ -48,7 +51,7 @@ async def edit_item(item: base.Item, data: edit.ItemEdit):
     )
 
     # Set new values
-    for field, value in data.model_dump().items:
+    for field, value in data.model_dump().items():
         setattr(item, field, value)
 
     return item
