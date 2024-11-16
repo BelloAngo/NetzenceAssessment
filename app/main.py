@@ -9,6 +9,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import ORJSONResponse
 
 from app.core.database import initialize_tables
+from app.item.apis import router as item_router
 from app.item.models import MODULE_TABLES as item_models
 
 # Globals
@@ -70,3 +71,4 @@ async def health_check():
 
 
 # Routers
+app.include_router(item_router, prefix="/items", tags=["Item APIs"])
