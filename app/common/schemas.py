@@ -1,14 +1,14 @@
-"""This module contains the schemas used in the application."""
-
 from typing import Any
+
 from pydantic import BaseModel, Field
 
 
 class ResponseSchema(BaseModel):
-    """The generic response schema for the application."""
+    """This is the generic base response schema"""
 
-    status: str = Field(description="The status of the request", default="success")
-    data: Any = Field(description="The data")
+    status: str = Field(description="The response status", default="success")
+    msg: str = Field(default="Request Successful", description="The response message")
+    data: Any = Field(description="The response data")
 
 
 class PaginationSchema(BaseModel):
@@ -21,3 +21,11 @@ class PaginationSchema(BaseModel):
     count: int = Field(description="The number of items returned")
     has_next_page: bool = Field(description="Indicates if there is a next page")
     has_prev_page: bool = Field(description="Indicates if there is a previous page")
+
+
+class PaginatedResponseSchema(ResponseSchema):
+    """
+    Generic schema for paginated responses
+    """
+
+    meta: PaginationSchema = Field(description="The pagination metadata")

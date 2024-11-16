@@ -1,14 +1,18 @@
 """This module contains the main FastAPI application."""
 
 from contextlib import asynccontextmanager
+
 from anyio import to_thread
-from fastapi import Depends, FastAPI
-from fastapi.responses import ORJSONResponse
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import ORJSONResponse
 
-from app.common.dependencies import get_db
-from app.example_module.apis import router as example_router
+# from app.core.database import initialize_tables
+# from app.item.models import MODULE_TABLES as item_models
+
+# Globals
+# TABLES = {**item_models}
 
 
 # Lifespan (startup, shutdown)
@@ -21,6 +25,9 @@ async def lifespan(_: FastAPI):
     # Bigger Threadpool i.e you send a bunch of requests it will handle a max of 1000 at a time, the default is 40
     limiter = to_thread.current_default_thread_limiter()
     limiter.total_tokens = 1000
+
+    # Init tables
+    # initialize_tables(tables_dict=TABLES)
 
     # Shutdown
     yield
@@ -56,10 +63,9 @@ app.add_middleware(
 
 # Health Check
 @app.get("/health", status_code=200, include_in_schema=False)
-async def health_check(_=Depends(get_db)):
+async def health_check():
     """This is the health check endpoint"""
     return {"status": "ok"}
 
 
 # Routers
-app.include_router(example_router, prefix="/example", tags=["Example Docs"])

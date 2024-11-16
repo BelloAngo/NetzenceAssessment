@@ -1,0 +1,3 @@
+ITEMS = {}
+
+MODULE_TABLES = {}

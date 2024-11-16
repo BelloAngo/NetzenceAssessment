@@ -1,0 +1,32 @@
+# type: ignore
+import os
+from functools import lru_cache
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    """
+    App Environemnt Variables
+    """
+
+    model_config = SettingsConfigDict(env_file=".env")
+
+    # App Settings
+    DEBUG: bool = os.environ.get("DEBUG")
+
+    # Database
+    DYNAMO_URL: str = os.environ.get("DYNAMO_URL")
+
+    # AWS
+    AWS_REGION: str = os.environ.get("AWS_REGION")
+    AWS_ACCESS_KEY_ID: str = os.environ.get("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY: str = os.environ.get("AWS_SECRET_ACCESS_KEY")
+
+
+@lru_cache
+def get_settings():
+    """
+    Get settings obj
+    """
+    return Settings()

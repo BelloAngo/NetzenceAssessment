@@ -1,11 +1,10 @@
-"""This module contains common dependencies used in the application"""
+from typing import Literal
 
-from app.common.types import PaginationParams
-from app.config.database import SessionLocal
+from app.common.types import PaginationParamsType
+from app.core.database import SessionLocal
 
 
 def get_db():
-    """This function starts a db session"""
     db = SessionLocal()
     try:
         yield db
@@ -13,6 +12,11 @@ def get_db():
         db.close()
 
 
-def pagination_params(page: int = 1, size: int = 10):
+def pagination_params(
+    q: str | None = None,
+    page: int = 1,
+    size: int = 10,
+    order_by: Literal["asc", "desc"] = "desc",
+):
     """Helper Dependency for pagination"""
-    return PaginationParams(page=page, size=size)
+    return PaginationParamsType(q=q, page=page, size=size, order_by=order_by)

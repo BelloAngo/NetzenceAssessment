@@ -1,14 +1,13 @@
 """This module contains the pagination logic for the application."""
 
 import math
-from sqlalchemy.orm import Query
 
 
-def get_pagination_metadata(*, qs: Query, count: int, page: int, size: int):
+def get_pagination_metadata(*, tno_items: int, count: int, page: int, size: int):
     """This function is used to the pagination metadata of a response.
 
     Args:
-        qs (Query): The query to derive the metadata (Pre Pagination)
+        tno_items (int): The tno items
         count (int): The number of items you are returning
         page (int): The current page
         size (int): The number of items per page
@@ -24,7 +23,7 @@ def get_pagination_metadata(*, qs: Query, count: int, page: int, size: int):
             "items": []
         }
     """
-    total_no_items = qs.count()
+    total_no_items = tno_items
     total_no_pages = math.ceil(total_no_items / size)
     metadata = {
         "total_no_items": total_no_items,
@@ -36,17 +35,3 @@ def get_pagination_metadata(*, qs: Query, count: int, page: int, size: int):
         "has_prev_page": page > 1,
     }
     return metadata
-
-
-def paginate(*, qs: Query, page: int, size: int):
-    """This function paginates a queryset
-
-    Args:
-        qs (Query): The qs to paginate
-        page (int): The page to return
-        size (int): The max number of items to return
-
-    Returns:
-        Query: The paginated qs
-    """
-    return qs.limit(size).offset(size * (page - 1)).all()
