@@ -1,8 +1,10 @@
+from typing import cast
+
 from fastapi import APIRouter
 from pydantic import UUID4
 
 from app.item import selectors, services
-from app.item.schemas import create, response
+from app.item.schemas import base, create, edit, response
 
 # Globals
 router = APIRouter()
@@ -38,6 +40,27 @@ async def route_items_get(item_id: UUID4):
     """
 
     # Get item
-    item = await selectors.get_item_by_id(id=item_id)
+    item = cast(base.Item, await selectors.get_item_by_id(id=item_id))
 
     return {"data": item}
+
+
+@router.put(
+    "/{item_id}/",
+    summary="Edit item details",
+    response_description="The new details of the item",
+    status_code=200,
+    response_model=response.ItemResponse,
+)
+async def route_items_edit(item_id: UUID4, item_in: edit.ItemEdit):
+    """
+    This endpoint edits the item's details
+    """
+
+    # Get item
+    item = cast(base.Item, await selectors.get_item_by_id(id=item_id))
+
+    # Edit item
+    new_item = await services.edit_item(item=item, data=item_in)
+
+    return {"data": new_item}
