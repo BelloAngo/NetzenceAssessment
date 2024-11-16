@@ -18,4 +18,4 @@ async def get_item_by_id(id: UUID4, raise_exc: bool = True):
     if not item and raise_exc:
         raise ItemNotFound()
 
-    return base.Item(**item)
+    return base.Item(**item) if item else None
