@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi.encoders import jsonable_encoder
 
@@ -26,7 +26,7 @@ async def create_item(data: create.ItemCreate):
         itemId=uuid.uuid4(),
         name=data.name,
         description=data.description,
-        createdAt=datetime.now(),
+        createdAt=datetime.now(tz=UTC),
     )
 
     # Create entry
