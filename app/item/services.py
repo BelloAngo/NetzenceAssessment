@@ -36,6 +36,16 @@ async def create_item(data: create.ItemCreate):
 
 
 async def edit_item(item: base.Item, data: edit.ItemEdit):
+    """
+    Edit item
+
+    Args:
+        item (base.Item): The item obj
+        data (edit.ItemEdit): The new details of the item
+
+    Returns:
+        base.Item: The edited item
+    """
     # Save changes
     item_table.update_item(
         Key={"itemId": str(item.itemId)},
@@ -53,5 +63,21 @@ async def edit_item(item: base.Item, data: edit.ItemEdit):
     # Set new values
     for field, value in data.model_dump().items():
         setattr(item, field, value)
+
+    return item
+
+
+async def delete_item(item: base.Item):
+    """
+    Delete item
+
+    Args:
+        item (base.Item): The item obj
+
+    Returns:
+        item: The deleted item obj
+    """
+    # Delete item
+    item_table.delete_item(Key={"itemId": str(item.itemId)})
 
     return item
