@@ -15,10 +15,10 @@ def get_dynamo_client():
     if settings.DEBUG:
         dynamodb: DynamoDBClient = boto3.client(
             "dynamodb",
-            region_name="us-west-2",
-            aws_access_key_id="fakeMyKeyId",  # Dummy credentials
-            aws_secret_access_key="fakeSecretAccessKey",  # Dummy credentials,
-            endpoint_url="http://localhost:8000",
+            region_name=settings.AWS_REGION,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            endpoint_url=settings.DYNAMO_URL,
         )
     else:
         dynamodb: DynamoDBClient = boto3.client(
@@ -38,7 +38,11 @@ def get_dynamo_resource():
     # Initialize the DynamoDB client
     if settings.DEBUG:
         dynamodb: DynamoDBServiceResource = boto3.resource(
-            "dynamodb", endpoint_url=settings.DYNAMO_URL
+            "dynamodb",
+            region_name=settings.AWS_REGION,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            endpoint_url=settings.DYNAMO_URL,
         )
     else:
         dynamodb: DynamoDBServiceResource = boto3.client(
