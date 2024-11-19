@@ -3,8 +3,8 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import ORJSONResponse
 
-from app.common.exceptions import CustomHTTPException, InternalServerError
-from app.core.settings import get_settings
+from common.exceptions import CustomHTTPException, InternalServerError
+from core.settings import get_settings
 
 # Globals
 settings = get_settings()

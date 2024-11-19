@@ -3,9 +3,9 @@ from typing import cast
 from fastapi import APIRouter
 from pydantic import UUID4
 
-from app.common.schemas import ResponseSchema
-from app.item import selectors, services
-from app.item.schemas import base, create, edit, response
+from common.schemas import ResponseSchema
+from item import selectors, services
+from item.schemas import base, create, edit, response
 
 # Globals
 router = APIRouter()

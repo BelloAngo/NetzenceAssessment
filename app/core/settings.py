@@ -19,9 +19,9 @@ class Settings(BaseSettings):
     DYNAMO_URL: str = os.environ.get("DYNAMO_URL")
 
     # AWS
-    AWS_REGION: str = os.environ.get("AWS_REGION")
-    AWS_ACCESS_KEY_ID: str = os.environ.get("AWS_ACCESS_KEY_ID")
-    AWS_SECRET_ACCESS_KEY: str = os.environ.get("AWS_SECRET_ACCESS_KEY")
+    A_REGION: str = os.environ.get("AWS_REGION")
+    A_ACCESS_KEY_ID: str = os.environ.get("AWS_ACCESS_KEY_ID")
+    A_SECRET_ACCESS_KEY: str = os.environ.get("AWS_SECRET_ACCESS_KEY")
 
 
 @lru_cache

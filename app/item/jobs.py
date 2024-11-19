@@ -4,9 +4,9 @@ from datetime import UTC, datetime, timedelta
 
 from fastapi.encoders import jsonable_encoder
 
-from app.core.dependencies import get_dynamo_resource
-from app.item import services
-from app.item.schemas import base
+from core.dependencies import get_dynamo_resource
+from item import services
+from item.schemas import base
 
 # Globals
 dynamo = get_dynamo_resource()

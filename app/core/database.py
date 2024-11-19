@@ -1,7 +1,7 @@
 from botocore.exceptions import ClientError
 
-from app.core.dependencies import get_dynamo_client
-from app.core.settings import get_settings
+from core.dependencies import get_dynamo_client
+from core.settings import get_settings
 
 # Globals
 settings = get_settings()

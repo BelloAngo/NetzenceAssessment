@@ -1,8 +1,8 @@
 from pydantic import UUID4
 
-from app.core.dependencies import get_dynamo_resource
-from app.item.exceptions import ItemNotFound
-from app.item.schemas import base
+from core.dependencies import get_dynamo_resource
+from item.exceptions import ItemNotFound
+from item.schemas import base
 
 # Globals
 dynamo = get_dynamo_resource()

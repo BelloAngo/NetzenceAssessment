@@ -1,7 +1,7 @@
 from typing import Literal
 
-from app.common.types import PaginationParamsType
-from app.core.database import SessionLocal
+from common.types import PaginationParamsType
+from core.database import SessionLocal
 
 
 def get_db():

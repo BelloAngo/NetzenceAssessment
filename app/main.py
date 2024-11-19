@@ -8,17 +8,19 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import ORJSONResponse
+from mangum import Mangum
+import uvicorn
 
-from app.common.exceptions import CustomHTTPException, InternalServerError
-from app.core.database import initialize_tables
-from app.core.handlers import (
+from common.exceptions import CustomHTTPException, InternalServerError
+from core.database import initialize_tables
+from core.handlers import (
     base_exception_handler,
     custom_http_exception_handler,
     internal_server_error_exception_handler,
     request_validation_exception_handler,
 )
-from app.item.apis import router as item_router
-from app.item.models import MODULE_TABLES as item_models
+from item.apis import router as item_router
+from item.models import MODULE_TABLES as item_models
 
 # Globals
 TABLES = {**item_models}
@@ -87,3 +89,12 @@ async def health_check():
 
 # Routers
 app.include_router(item_router, prefix="/items", tags=["Item APIs"])
+
+initialize_tables(tables=TABLES)
+
+# Set mangum handler
+handler = Mangum(app=app, lifespan="off")
+
+
+if __name__ == "__main__":
+    uvicorn.run(app=app)

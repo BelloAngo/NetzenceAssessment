@@ -1,7 +1,7 @@
 from pydantic import Field
 
-from app.common.schemas import ResponseSchema
-from app.item.schemas.base import Item
+from common.schemas import ResponseSchema
+from item.schemas.base import Item
 
 
 class ItemResponse(ResponseSchema):

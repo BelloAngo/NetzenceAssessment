@@ -3,8 +3,8 @@ from datetime import UTC, datetime
 
 from fastapi.encoders import jsonable_encoder
 
-from app.core.dependencies import get_dynamo_resource
-from app.item.schemas import base, create, edit
+from core.dependencies import get_dynamo_resource
+from item.schemas import base, create, edit
 
 # Globals
 dynamo = get_dynamo_resource()

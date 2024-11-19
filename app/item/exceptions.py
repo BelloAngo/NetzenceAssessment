@@ -1,4 +1,4 @@
-from app.common.exceptions import NotFound
+from common.exceptions import NotFound
 
 
 class ItemNotFound(NotFound):
