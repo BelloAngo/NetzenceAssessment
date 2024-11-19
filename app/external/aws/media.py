@@ -2,12 +2,18 @@ import logging
 
 from botocore.exceptions import ClientError
 
+from core.dependencies import get_s3_client
+from core.settings import get_settings
 
-def upload_file_to_bucket(s3_client, file_obj, bucket, folder, object_name=None):
+# Globals
+settings = get_settings()
+s3_client = get_s3_client()
+
+
+def upload_file_to_bucket(file_obj, folder, object_name=None):
     """Upload a file to an S3 bucket
 
     :param file_obj: File to upload
-    :param bucket: Bucket to upload to
     :param folder: Folder to upload to
     :param object_name: S3 object name. If not specified then file_name is used
     :return: True if file was uploaded, else False
@@ -18,7 +24,9 @@ def upload_file_to_bucket(s3_client, file_obj, bucket, folder, object_name=None)
 
     # Upload the file
     try:
-        response = s3_client.upload_fileobj(file_obj, bucket, f"{folder}/{object_name}")
+        s3_client.upload_file(
+            file_obj, settings.A_ARCHIVE_BUCKET, f"{folder}/{object_name}.json"
+        )
     except ClientError as e:
         logging.error(e)
         return False

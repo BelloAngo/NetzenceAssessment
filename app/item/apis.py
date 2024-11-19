@@ -1,14 +1,20 @@
 from typing import cast
 
-from fastapi import APIRouter
-from pydantic import UUID4
-
 from common.schemas import ResponseSchema
+from fastapi import APIRouter
 from item import selectors, services
+from item.jobs import archive_items
 from item.schemas import base, create, edit, response
+from pydantic import UUID4
 
 # Globals
 router = APIRouter()
+
+
+@router.get("/arch")
+async def arch():
+    no_archived = await archive_items()
+    return {"msg": f"{no_archived} item(s) archived"}
 
 
 @router.post(

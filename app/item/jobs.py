@@ -2,9 +2,9 @@ import json
 import os
 from datetime import UTC, datetime, timedelta
 
-from fastapi.encoders import jsonable_encoder
-
 from core.dependencies import get_dynamo_resource
+from external.aws.media import upload_file_to_bucket
+from fastapi.encoders import jsonable_encoder
 from item import services
 from item.schemas import base
 
@@ -13,7 +13,7 @@ dynamo = get_dynamo_resource()
 item_table = dynamo.Table("items")
 
 
-async def archive_items():
+async def archive_items(event, context):
     # Get items
     response = item_table.scan()
     items = response.get("Items", [])
@@ -39,6 +39,12 @@ async def archive_items():
         json.dump(archive, file, indent=4)
 
     # Save archive to s3
+    curr_time = datetime.now()
+    upload_file_to_bucket(
+        "archive.json",
+        f"arch-{curr_time.strftime("%Y-%m")}",
+        curr_time.strftime("%Y-%m-%d"),
+    )
 
     #  Delete item
     for item in archive:
@@ -47,4 +53,4 @@ async def archive_items():
     # Delete archive file
     os.remove("archive.json")
 
-    return archive
+    return len(archive)
