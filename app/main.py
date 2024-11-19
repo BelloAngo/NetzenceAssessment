@@ -94,7 +94,3 @@ initialize_tables(tables=TABLES)
 
 # Set mangum handler
 handler = Mangum(app=app, lifespan="off")
-
-
-if __name__ == "__main__":
-    uvicorn.run(app=app)

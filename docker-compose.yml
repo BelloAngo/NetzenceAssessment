@@ -1,38 +1,11 @@
-version: '3.8'
-
 services:
-  heavyweight_fastapi:
-    build: .
-    command: bash -c 'while !</dev/tcp/dynamodb_local/8000; do sleep 1; done; uvicorn app.main:app --host 0.0.0.0 --port 8000'
-    volumes:
-      - .:/app
-    ports:
-      - 8000:8000
-    environment:
-      - DEBUG=true
-      - DYNAMO_URL=http://dynamodb_local:8090
-      - AWS_REGION=us-west-2
-      - AWS_ACCESS_KEY_ID=local
-      - AWS_SECRET_ACCESS_KEY=local
-    depends_on:
-      - dynamodb_local
-    networks:
-      - heavyweight_network
-
   dynamodb_local:
     image: amazon/dynamodb-local
     container_name: dynamodb_local
     ports:
-      - 8090:8090
+      - 8000:8000
     volumes:
       - dynamodb_data:/home/dynamodblocal/data
-    environment:
-      - AWS_REGION=us-west-2
-    networks:
-      - heavyweight_network
 
 volumes:
   dynamodb_data:
-
-networks:
-  heavyweight_network:

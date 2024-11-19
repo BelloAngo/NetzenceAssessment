@@ -13,7 +13,7 @@ dynamo = get_dynamo_resource()
 item_table = dynamo.Table("items")
 
 
-async def archive_items(event, context):
+async def archive_items():
     # Get items
     response = item_table.scan()
     items = response.get("Items", [])
