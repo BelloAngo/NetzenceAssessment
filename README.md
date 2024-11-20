@@ -1,149 +1,154 @@
-## Heavyweight(FastAPI) Starter Template for Large Applications
+# **Netzence Backend Technical Task**
+#### **Candidate:** Bello Shehu Ango
 
-This repository provides a robust template for creating powerful FastAPI applications that leverage Postgres and Alembic. Inspired by [Radoslav Georgiev's Django Structure for Scale lecture](https://youtu.be/yG3ZdxBb1oo?si=D6A9dHyhKb_Kf-J7) and my own personal experience, this template offers a structured approach to building scalable web applications.
+---
 
-### Project Structure
-```
-.vscode
-alembic/
-app/
-    common/
-        __init__.py
-        dependencies.py
-        paginators.py
-        regex.py
-        schemas.py
-        security.py
-        types.py
-    config/
-        __init__.py
-        database.py
-        settings.py
-    example_module/
-        __init__.py
-        apis.py
-        models.py
-        schemas.py
-        selectors.py
-        services.py
-    __init__.py
-    main.py
-.gitignore
-alembic.ini
-docker-compose.yml
-Dockerfile
-env_sample.txt
-railway.toml
-requirements.txt
-start.sh
-```
+## **Task 1: Simple API with AWS Lambda, API Gateway, and DynamoDB**
 
-### Components
+### **Deployment Steps**
 
-**.vscode:** Configuration files for Visual Studio Code.
+1. **Build and Publish the Docker Image to ECR**
+   - Log in to your AWS account and navigate to the ECR page. Create a new repository; in this example, it's named `netzence/assessment`.  
+     ![alt text](static/images/static/img/image.png)  
+   - Copy the URI of the repository for use in the following steps.
 
-**alembic/:** Contains Alembic settings and migrations.
+   - Open your terminal in the project directory and run:  
+     ```bash
+     docker build -t netzence_assessment .
+     ```
+   - Tag the image with the URI of the ECR repository:  
+     ```bash
+     docker tag netzence_assessment:latest <ECR_REPOSITORY_URI>
+     ```
+   - Log in to your ECR repository:  
+     ```bash
+     aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <ECR_REPOSITORY_URI>
+     ```
+     ![alt text](static/images/image-22.png)  
 
-**config/:** Holds project settings.
-- **database.py:** Manages database connection, session settings, and the base database model.
-- **settings.py:** Utilizes pydantic_settings to load environment variables. Change the `SECRET_KEY` from the default value on Railway.
+   - Push the image to your ECR repository:  
+     ```bash
+     docker push <ECR_REPOSITORY_URI>
+     ```
+     Verify the image is uploaded by navigating to the ECR repository's details page.  
+     ![alt text](static/images/image-1.png)
 
-**app/:** The main FastAPI project directory.
-  - **common/:**:
-    - **dependencies.py:** The common dependencies used by all the modules
-    - **paginators.py:** The collection of helpers for response pagination
-    - **regex.py:** Where common regular expressions will be kept
-    - **schemas.py:** Where you will keep your general/generic schemas
-    - **security.py:** Where the authentication functions are kept
-    - **types.py:** Where general/generic types are kept
+2. **Create IAM Policy and Role**
+   - Go to the IAM console and create a new policy.  
+     ![alt text](static/images/image-3.png)  
+   - Switch to the **JSON** tab and paste the following policy:  
+     ```json
+     {
+         "Version": "2012-10-17",
+         "Statement": [
+             {
+                 "Sid": "ReadWriteTable",
+                 "Effect": "Allow",
+                 "Action": [
+                     "dynamodb:BatchGetItem",
+                     "dynamodb:GetItem",
+                     "dynamodb:Query",
+                     "dynamodb:Scan",
+                     "dynamodb:BatchWriteItem",
+                     "dynamodb:PutItem",
+                     "dynamodb:UpdateItem",
+                     "dynamodb:DescribeTable"
+                 ],
+                 "Resource": "arn:aws:dynamodb:*:*:table/items"
+             },
+             {
+                 "Sid": "WriteLogStreamsAndGroups",
+                 "Effect": "Allow",
+                 "Action": [
+                     "logs:CreateLogStream",
+                     "logs:PutLogEvents"
+                 ],
+                 "Resource": "*"
+             }
+         ]
+     }
+     ```
+     ![alt text](static/images/image-4.png)  
+   - Name the policy `NetzenceAssessmentLambdaPolicy`.  
+     ![alt text](static/images/image-7.png)
 
-  - **config/:** Holds project settings.
-    - **database.py:** Manages database connection, session settings, and the base database model.
-    - **settings.py:** Utilizes pydantic_settings to load environment variables. Change the `SECRET_KEY` from the default value on Railway.
+   - Create a new role:  
+     ![alt text](static/images/image-6.png)  
+     Select **Lambda** as the trusted entity and attach the policy `NetzenceAssessmentLambdaPolicy`.  
+     ![alt text](static/images/image-8.png)  
+     Name the role `NetzenceAssessmentLambdaRole`.  
+     ![alt text](static/images/image-10.png)
 
-  - **example_module/:**
-    An Example of how you might structure your different modules/apps, doing it this way makes it easy to decouple/seggregate
-    - **apis.py:** Houses endpoints like `user_create`, `user_login`, and `user_details`.
-    - **models.py:** Uses SQLAlchemy to draft the user table. Alembic handles migrations.
-    - **schemas.py:** Defines schemas for create, details, login, and token requests.
-    - **selectors.py:** Manages GET operations, fetching data from the database.
-    - **services.py:** Handles POST, PUT, PATCH, and DELETE operations, manipulating database data.
-  - **main.py:** Entry point of the application
+3. **Set Up S3 Bucket**
+   - Navigate to the S3 service and create a bucket named `netzence-assessment-bucket`.  
+     Disable "Block all public access" (not recommended for production).  
+     ![alt text](static/images/image-14.png)  
+     ![alt text](static/images/image-16.png)  
+   - Add the following bucket policy under **Permissions > Bucket Policy**:  
+     ```json
+     {
+         "Version": "2012-10-17",
+         "Statement": [
+             {
+                 "Sid": "PublicReadGetObject",
+                 "Effect": "Allow",
+                 "Principal": "*",
+                 "Action": "s3:GetObject",
+                 "Resource": "arn:aws:s3:::netzence-assessment-bucket/*"
+             }
+         ]
+     }
+     ```
+     ![alt text](static/images/image-19.png)
 
-**.gitignore:** This specifies which folders/files to not push to github
-**env_sample.txt:** Sample environment variable list. Create a `.env` file and provide values.
+4. **Create the Lambda Function**
+   - Go to the Lambda service and create a function using a container image. Name it `NetzenceAssessmentLambda1`.  
+     ![alt text](static/images/image.png)  
+   - Select the ECR repository with your Docker image and set the architecture to `x86_64`.  
+   - Choose the execution role `NetzenceAssessmentLambdaRole`.  
+     ![alt text](static/images/image-12.png)
 
-### Getting Started
+   - Add environment variables under **Configuration > Environment Variables**. Replace placeholder values with your live AWS credentials.  
+     ![alt text](static/images/image-13.png)
 
-1. Setup Virtual Environment (If you are not using docker)
-   ```shell
-   $ py -m venv .venv
-   $ .venv\Scripts\activate
-   ```
-   NOTE: If you are using VsCode and you see a popup that says use env as workspace env then click yes
+5. **Set Up API Gateway**
+   - Navigate to the API Gateway service and create a REST API named `NetzenceAssessmentAPI`.  
+     ![alt text](static/images/image-25.png)  
+   - Create a resource and enable proxy integration for `{endpoints+}`.  
+     ![alt text](static/images/image-28.png)  
+   - Link the resource to the Lambda function. Configure methods for `GET`, `POST`, `PUT`, and `DELETE`.  
+     ![alt text](static/images/image-31.png)  
+   - Deploy the API to a stage named `dev` and copy the Invoke URL for testing.  
+     ![alt text](static/images/image-37.png)
 
-</br>
-2. Install dependencies:
-   Locally
+---
 
-   ```shell
-   $ pip install -r requirements.txt
-   ```
-</br>
-    With Docker
-   
-   ```shell
-   docker-compose up
-   ```
-</br>
+## **Task 2: Lambda Function for Scheduled Data Archiving**
 
-3. Create a `.env` file and input environment variables.
-</br>
+1. **Create the Lambda Function**
+   - Name the function `itemArchiver` and set the runtime to Python 3.13.  
+     ![alt text](static/images/image-39.png)  
+   - Use the same role `NetzenceAssessmentLambdaRole`.  
+     ![alt text](static/images/image-40.png)  
+   - Upload the code from `archiver.py` and set the environment variable `S3_BUCKET` to `netzence-assessment-bucket`.  
+     ![alt text](static/images/image-42.png)
 
-4. Initialize database tables:
-   ```
-   alembic upgrade head
-   ```
+2. **Schedule the Function**
+   - Use Amazon EventBridge to create a daily recurring schedule.  
+     ![alt text](static/images/image-44.png)  
+   - Set the target to invoke the `itemArchiver` Lambda function.  
+     ![alt text](static/images/image-47.png)
 
-</br>
+---
 
-5. Start the application in development mode:
-   ```
-   fastapi dev
-   ```
-  In production use
-  ```
-  fastapi run
-  ```
-</br>
+## **Testing the API**
+- Import the provided Postman collection (`API Docs.postman_collection.json`) and set the `BASE_URL` to the Invoke URL of your API Gateway.
 
-6. Test the application by making requests to endpoints.
+---
 
-### Contribute to the Project
+## **Assumptions**
+- The DynamoDB table can be created within the application itself rather than through the AWS Console.
 
-We welcome contributions from the community to make this FastAPI Starter Template even better. If you have ideas for improvements, new features, or bug fixes, feel free to:
+---
 
-- Fork the repository and create a new branch for your contribution.
-- Submit pull requests to propose changes to the project.
-- Engage in discussions and share your thoughts on enhancements.
-
-By contributing, you help make this template more valuable for developers building FastAPI applications. Together, we can create a robust foundation for large-scale projects. Thank you for your support!
-
-For detailed information, refer to the following resources:
-
-- FastAPI documentation: https://fastapi.tiangolo.com/
-- Alembic documentation: https://alembic.sqlalchemy.org/en/latest/
-- Django Structure for Scale lecture: https://youtu.be/yG3ZdxBb1oo?si=D6A9dHyhKb_Kf-J7
-
-
-### Contact
-
-If you have any questions or suggestions, feel free to reach out to me:
-(P.S I am looking for a job, i consult and i tutor :)
-
-- Name: Bello Shehu Ango
-- Email: angobello0@gmail.com
-- GitHub: https://github.com/Grey-A
-- Linkedin: https://linkedin.com/in/angobello0
-- Upwork: https://www.upwork.com/freelancers/~01bb1007bf8311388a
-- Instagram: https://www.instagram.com/bello_ango0/
+This improved version maintains structure, clarity, and readability while keeping the original images in place. Let me know if you'd like further edits!
